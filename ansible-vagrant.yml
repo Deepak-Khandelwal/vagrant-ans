@@ -1,0 +1,43 @@
+---
+- hosts: vagrant
+  become_user: root
+
+  tasks:
+ 
+     - name: create a user testuser
+       user:
+         name: testuser
+         state: present
+         password: "testuser"
+         shell: /bin/bash
+         home: /home/testuser
+
+     - name: copy a local random file
+       copy: src=/root/xyz dest=/home/testuser/abc
+ 
+     - name: set timezone to Asia/Kolkata
+       copy: content='Asia/Kolkata'
+               dest=/etc/timezone
+               owner=root
+               group=root
+               mode=0644
+       notify:
+         name: update-timezone
+        
+
+     - name: install pyhton
+       apt: name=python state=present
+
+     - name: install supervisord
+       pip:
+         name: supervisord
+
+     - name: install consul
+       unarchive: 
+             src: /root/vagrant/consul_0.8.5_linux_amd64.zip
+             dest: /usr/local/bin 
+
+  handlers: 
+    - name: update-timezone
+      command: dpkg-reconfigure --frontent noninteractive tzdata
+       
